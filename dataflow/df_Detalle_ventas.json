@@ -58,7 +58,17 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SLS_ORD_NUM = sls_ord_num,",
+				"          SLS_PRD_KEY = sls_prd_key,",
+				"          SLS_CUST_ID = sls_cust_id,",
+				"          SLS_ORDER_DT = sls_order_dt,",
+				"          SLS_SHIP_DT = sls_ship_dt,",
+				"          SLS_SALES = sls_sales,",
+				"          SLS_QUANTITY = sls_quantity,",
+				"          SLS_PRICE = sls_price",
+				"     )) ~> sink1"
 			]
 		}
 	}
