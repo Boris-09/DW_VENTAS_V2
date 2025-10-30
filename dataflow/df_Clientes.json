@@ -54,7 +54,15 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CST_ID = cst_id,",
+				"          CST_KEY = cst_key,",
+				"          CST_FIRSTNAME = cst_firstname,",
+				"          CST_LASTNAME = cst_lastname,",
+				"          CST_MARITAL_STATUS = cst_marital_status,",
+				"          CST_GNRD = cst_gndr",
+				"     )) ~> sink1"
 			]
 		}
 	}

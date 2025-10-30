@@ -52,7 +52,14 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          PRD_ID = prd_id,",
+				"          PRD_KEY = prd_key,",
+				"          PRD_NM = prd_nm,",
+				"          PRD_COST = prd_cost,",
+				"          PRD_LINE = prd_line",
+				"     )) ~> sink1"
 			]
 		}
 	}
