@@ -19,7 +19,6 @@
 			"transformations": [],
 			"scriptLines": [
 				"source(output(",
-				"          PRD_ID as integer,",
 				"          PRD_KEY as string,",
 				"          PRD_NM as string,",
 				"          PRD_COST as string,",
@@ -30,7 +29,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT \\n    p.PRD_KEY,\\n    p.PRD_NM,\\n    p.PRD_COST,\\n    p.PRD_LINE,\\n    pc.CAT,\\n    pc.MAINTENANCE\\nFROM [SILVER].[PRODUCTOS] p\\nLEFT JOIN [BRONZE].[PRODUCTOS_CAT_MANT] pc \\n    ON p.PRD_ID = pc.ID\\nWHERE p.PRD_KEY IS NOT NULL',",
+				"     query: 'SELECT\\n    p.PRD_KEY,\\n    p.PRD_NM,\\n    p.PRD_COST,\\n    p.PRD_LINE,\\n    p.CAT,\\n    p.MAINTENANCE\\nFROM SILVER.PRODUCTOS p',",
 				"     format: 'query') ~> productos"
 			]
 		}
