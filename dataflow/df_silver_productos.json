@@ -40,6 +40,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -63,13 +66,12 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> catMant",
-				"productos derive(PRD_KEY = replace(left(PRD_KEY, 5), '-', '_'),",
+				"productos derive(PRD_KEY = toString(replace(left(PRD_KEY, 5), '-', '_'),PRD_KEY),",
 				"          PRD_COST = iif(\r",
 				"    isNull(toFloat(PRD_COST)) || toString(trim(PRD_COST)) == '' || toFloat(PRD_COST) <= 0,\r",
 				"    0,\r",
 				"    toInteger(PRD_COST)\r",
-				")\r",
-				") ~> derivedColumn1",
+				")) ~> derivedColumn1",
 				"derivedColumn1, catMant join(PRD_KEY == ID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
@@ -86,6 +88,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
+				"catMant derive(ID = toString(ID)) ~> derivedColumn2",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
