@@ -42,7 +42,7 @@
 					"name": "select1"
 				},
 				{
-					"name": "derivedColumn2"
+					"name": "cast1"
 				}
 			],
 			"scriptLines": [
@@ -66,13 +66,12 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> catMant",
-				"productos derive(PRD_KEY = left(upper(trim(PRD_KEY)), 5),",
-				"          PRD_COST = iif(\r",
-				"    isNull(toFloat(PRD_COST)) || toString(trim(PRD_COST)) == '' || toFloat(PRD_COST) <= 0,\r",
+				"productos derive(PRD_KEY = replace(left(upper(trim(PRD_KEY)), 5), '-', '_'),",
+				"          PRD_COST = iif(isNull(toFloat(PRD_COST)) || toString(trim(PRD_COST)) == '' || toFloat(PRD_COST) <= 0,\r",
 				"    0,\r",
-				"    toInteger(PRD_COST)\r",
+				"    toInteger(toFloat(PRD_COST))\r",
 				")) ~> derivedColumn1",
-				"derivedColumn1, derivedColumn2 join(PRD_KEY == ID,",
+				"derivedColumn1, catMant join(PRD_KEY == ID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -88,8 +87,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"catMant derive(ID = upper(trim(ID))) ~> derivedColumn2",
-				"select1 sink(allowSchemaDrift: true,",
+				"select1 cast(output(",
+				"          PRD_ID as string,",
+				"          PRD_COST as string",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"cast1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          PRD_ID as integer,",
@@ -107,7 +110,15 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          PRD_KEY,",
+				"          PRD_NM,",
+				"          PRD_COST,",
+				"          PRD_LINE,",
+				"          CAT,",
+				"          MAINTENANCE",
+				"     )) ~> sink1"
 			]
 		}
 	}
