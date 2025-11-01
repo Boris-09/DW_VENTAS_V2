@@ -41,16 +41,13 @@
 					"name": "cast3"
 				},
 				{
-					"name": "union4"
-				},
-				{
-					"name": "union5"
-				},
-				{
 					"name": "select1"
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "union1"
 				}
 			],
 			"scriptLines": [
@@ -84,8 +81,7 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> location",
 				"select1 cast(output(",
-				"          BDATE as date 'yyyy-MM-dd',",
-				"          GEN as string",
+				"          BDATE as date 'yyyy-MM-dd'",
 				"     ),",
 				"     errors: true) ~> cast1",
 				"select2 cast(output(",
@@ -96,11 +92,8 @@
 				"          CST_ID as string",
 				"     ),",
 				"     errors: true) ~> cast3",
-				"cast3, cast1 union(byName: true)~> union4",
-				"union4, cast2 union(byName: true)~> union5",
 				"BDGEN select(mapColumn(",
-				"          BDATE,",
-				"          GEN",
+				"          BDATE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -108,7 +101,8 @@
 				"          CNTRY",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2"
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"cast3, cast1 union(byName: true)~> union1"
 			]
 		}
 	}
