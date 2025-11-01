@@ -1,0 +1,115 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_Clientes",
+						"type": "DatasetReference"
+					},
+					"name": "clientes"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_Clientes_BD_GEN",
+						"type": "DatasetReference"
+					},
+					"name": "BDGEN"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_Clientes_location",
+						"type": "DatasetReference"
+					},
+					"name": "location"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "cast2"
+				},
+				{
+					"name": "cast3"
+				},
+				{
+					"name": "union4"
+				},
+				{
+					"name": "union5"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CST_ID as string,",
+				"          CST_KEY as string,",
+				"          CST_FIRSTNAME as string,",
+				"          CST_LASTNAME as string,",
+				"          CST_MARITAL_STATUS as string,",
+				"          CST_GNRD as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> clientes",
+				"source(output(",
+				"          CID as string,",
+				"          BDATE as string,",
+				"          GEN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> BDGEN",
+				"source(output(",
+				"          CID as string,",
+				"          CNTRY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> location",
+				"select1 cast(output(",
+				"          BDATE as date 'yyyy-MM-dd',",
+				"          GEN as string",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"select2 cast(output(",
+				"          CNTRY as string",
+				"     ),",
+				"     errors: true) ~> cast2",
+				"clientes cast(output(",
+				"          CST_ID as string",
+				"     ),",
+				"     errors: true) ~> cast3",
+				"cast3, cast1 union(byName: true)~> union4",
+				"union4, cast2 union(byName: true)~> union5",
+				"BDGEN select(mapColumn(",
+				"          BDATE,",
+				"          GEN",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"location select(mapColumn(",
+				"          CNTRY",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2"
+			]
+		}
+	}
+}
