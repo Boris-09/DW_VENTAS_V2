@@ -15,7 +15,15 @@
 					"name": "productos"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_gold_productos",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [],
 			"scriptLines": [
 				"source(output(",
@@ -29,8 +37,26 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT\\n    p.PRD_KEY,\\n    p.PRD_NM,\\n    p.PRD_COST,\\n    p.PRD_LINE,\\n    p.CAT,\\n    p.MAINTENANCE\\nFROM SILVER.PRODUCTOS p',",
-				"     format: 'query') ~> productos"
+				"     query: 'SELECT\\n    PRD_KEY,\\n    PRD_NM,\\n    PRD_COST,\\n    PRD_LINE,\\n    CAT,\\n    MAINTENANCE\\nFROM SILVER.PRODUCTOS',",
+				"     format: 'query') ~> productos",
+				"productos sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          PRD_KEY as string,",
+				"          PRD_NM as string,",
+				"          PRD_COST as string,",
+				"          PRD_LINE as string,",
+				"          CAT as string,",
+				"          MAINTENANCE as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 			]
 		}
 	}

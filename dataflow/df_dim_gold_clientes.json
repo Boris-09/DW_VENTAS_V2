@@ -1,5 +1,5 @@
 {
-	"name": "df_dim_glod_clientes",
+	"name": "df_dim_gold_clientes",
 	"properties": {
 		"folder": {
 			"name": "Gold"
@@ -24,19 +24,15 @@
 					"name": "sink1"
 				}
 			],
-			"transformations": [
-				{
-					"name": "select1"
-				}
-			],
+			"transformations": [],
 			"scriptLines": [
 				"source(output(",
 				"          CST_KEY as string,",
+				"          CST_GNRD as string,",
 				"          CST_ID as integer,",
 				"          CST_FIRSTNAME as string,",
 				"          CST_LASTNAME as string,",
 				"          CST_MARITAL_STATUS as string,",
-				"          CST_GNRD as string,",
 				"          CNTRY as string,",
 				"          BDATE as date,",
 				"          GEN as string",
@@ -44,20 +40,9 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT\\n    CST_KEY,\\n    CST_ID,\\n    CST_FIRSTNAME,\\n    CST_LASTNAME,\\n    CST_MARITAL_STATUS,\\n    CST_GNRD,\\n    CNTRY,\\n    BDATE,\\n    GEN\\nFROM\\n    SILVER.CLIENTES',",
+				"     query: 'SELECT\\n    CST_KEY,\\n    CST_GNRD,\\n    CST_ID,\\n    CST_FIRSTNAME,\\n    CST_LASTNAME,\\n    CST_MARITAL_STATUS,\\n    CNTRY,\\n    BDATE,\\n    GEN\\nFROM\\n    SILVER.CLIENTES',",
 				"     format: 'query') ~> clientes",
-				"clientes select(mapColumn(",
-				"          CST_ID,",
-				"          CST_KEY,",
-				"          CST_FIRSTNAME,",
-				"          CST_LASTNAME,",
-				"          CST_MARITAL_STATUS,",
-				"          CNTRY,",
-				"          BDATE",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 sink(allowSchemaDrift: true,",
+				"clientes sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          CST_ID as string,",
@@ -76,7 +61,16 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CST_ID,",
+				"          CST_FIRSTNAME,",
+				"          CST_LASTNAME,",
+				"          CST_MARITAL_STATUS,",
+				"          CNTRY,",
+				"          BDATE,",
+				"          GEN",
+				"     )) ~> sink1"
 			]
 		}
 	}
