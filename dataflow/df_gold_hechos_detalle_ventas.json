@@ -12,11 +12,47 @@
 						"referenceName": "ds_sql_gold_hechos_detalle_ventas",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "hechos"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_gold_clientes",
+						"type": "DatasetReference"
+					},
+					"name": "clientes"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_gold_fecha",
+						"type": "DatasetReference"
+					},
+					"name": "fecha"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_gold_productos",
+						"type": "DatasetReference"
+					},
+					"name": "productos"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_gold_hechos_detalle_ventas",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "join1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          SLS_ORD_NUM as string,",
@@ -32,7 +68,81 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'SELECT\\n  SLS_ORD_NUM,\\n  SLS_PRD_KEY,\\n  SLS_CUST_ID,\\n  SLS_ORDER_DT,\\n  SLS_SHIP_DT,\\n  SLS_SALES,\\n  SLS_QUANTITY,\\n  SLS_PRICE\\nFROM SILVER.DETALLE_VENTA',",
-				"     format: 'query') ~> source1"
+				"     format: 'query') ~> hechos",
+				"source(output(",
+				"          CST_KEY as string,",
+				"          CST_GNRD as string,",
+				"          CST_ID as integer,",
+				"          CST_FIRSTNAME as string,",
+				"          CST_LASTNAME as string,",
+				"          CST_MARITAL_STATUS as string,",
+				"          CNTRY as string,",
+				"          BDATE as date,",
+				"          GEN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT\\n    CST_KEY,\\n    CST_GNRD,\\n    CST_ID,\\n    CST_FIRSTNAME,\\n    CST_LASTNAME,\\n    CST_MARITAL_STATUS,\\n    CNTRY,\\n    BDATE,\\n    GEN\\nFROM\\n    SILVER.CLIENTES',",
+				"     format: 'query') ~> clientes",
+				"source(output(",
+				"          ID_FECHA as integer,",
+				"          FECHA as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> fecha",
+				"source(output(",
+				"          PRD_KEY as string,",
+				"          PRD_NM as string,",
+				"          PRD_COST as string,",
+				"          PRD_LINE as string,",
+				"          CAT as string,",
+				"          MAINTENANCE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> productos",
+				"clientes cast(output(",
+				"          CST_ID as string",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"hechos, cast1 join(SLS_CUST_ID == CST_ID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID_HECHOS as integer,",
+				"          SLS_ORD_NUM as string,",
+				"          SLS_PRD_KEY as string,",
+				"          SLS_CUST_ID as string,",
+				"          ID_ORDER_DT as integer,",
+				"          ID_SHIP_DT as integer,",
+				"          SLS_SALES as integer,",
+				"          SLS_QUANTITY as integer,",
+				"          SLS_PRICE as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SLS_ORD_NUM,",
+				"          SLS_PRD_KEY,",
+				"          SLS_CUST_ID,",
+				"          SLS_SALES,",
+				"          SLS_QUANTITY,",
+				"          SLS_PRICE",
+				"     )) ~> sink1"
 			]
 		}
 	}
